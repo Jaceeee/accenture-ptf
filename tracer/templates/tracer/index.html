@@ -12,10 +12,26 @@
             width: 100%;
             height: 100%;
         }
+
+        #route-selection {
+        	position: relative;
+        	top: 100px;
+        	left: 10px;
+        	z-index: 99999;
+        	background-color: red;
+        }
+
+        .container {
+
+        }
     </style>
 </head>
 <body>
     <div id="map" class="map"></div>
+    <div class="container">    	
+	    <select name="" id="route-selection">	    	
+	    </select>
+    </div>
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
     <script src="{% static 'tracer/js/Control.Geocoder.js' %}"></script>
     <script src="{% static 'tracer/js/leaflet-routing-machine.js' %}"></script>
@@ -292,7 +308,10 @@
             	]
             }
         ];
-        var map = L.map('map');
+        var map = L.map('map').setView([10.340498, 123.906306], 13);
+
+        var sourceCoordinates = L.latLng(10.340498, 123.906306);
+        var destinationCoordinates = L.latLng(10.323109, 123.898640);
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -300,31 +319,14 @@
 
         var control = L.Routing.control({
             waypoints: [                
-            	L.latLng(10.340498, 123.906306),
-        		L.latLng(10.336344, 123.907881),
-        		L.latLng(10.331031, 123.908127),
-        		L.latLng(10.330490, 123.906341),
-        		L.latLng(10.328385, 123.903781),
-        		L.latLng(10.319467, 123.898930),
-        		L.latLng(10.315961, 123.890862),
-        		L.latLng(10.297685, 123.897314),
-        		L.latLng(10.292608, 123.892583),
-        		L.latLng(10.292344, 123.898611),
-        		L.latLng(10.292392, 123.900945),
-        		L.latLng(10.292497, 123.903101),
-        		L.latLng(10.294692, 123.903852),
-        		L.latLng(10.300118, 123.898039),
-        		L.latLng(10.309180, 123.893483),
-        		L.latLng(10.316800, 123.892595),
-        		L.latLng(10.323109, 123.898640),
-        		L.latLng(10.328951, 123.905256),
-        		L.latLng(10.330155, 123.906707),
-        		L.latLng(10.331205, 123.908111),
-                L.latLng(10.340498, 123.906306),
+            	sourceCoordinates
             ],
             router: L.Routing.mapbox('pk.eyJ1IjoiamFjZXJvbGRhbiIsImEiOiJjamp6dDM0OTgwZmJ6M3B0eTZyNmhkaWZ6In0.jdkab4YMJJKdrI5rz_bzLg'),
             geocoder: L.Control.Geocoder.google()	
         }).addTo(map);
+
+        L.marker(sourceCoordinates).addTo(map);
+        L.marker(destinationCoordinates).addTo(map);
 
         //functions for initiating waypoint creation on click actions
 
@@ -334,6 +336,32 @@
         	btn.innerHTML = label;
         	return btn;
         }
+
+        var selection = document.getElementById('route-selection');
+
+        function setCurrentWaypoint(waypoint) {        	
+        	console.log(waypoint);
+        	control.setWaypoints(waypoint.routes);	
+        }
+		// sets the DOM nodes 
+        var nodes = [];
+        for (var i = 0; i < waypoints.length; i++) {
+        	nodeToPush = document.createElement("option");
+        	nodeToPush.setAttribute("class", "active-route");
+        	currentName = waypoints[i].name;
+        	nodeToPush.innerHTML = currentName;
+        	nodeToPush.value = currentName;
+        	nodes.push(nodeToPush);        	
+        	selection.appendChild(nodes[i]);
+        }
+
+        var waypointToPresent;
+
+        selection.addEventListener("click", function() {
+        	waypointToPresent = getWaypointByName(selection.value);
+
+        	setCurrentWaypoint(waypointToPresent);
+        });
 
         map.on('click', function(e) {
         	console.log(e);
@@ -357,7 +385,19 @@
         	})
         });
 
+        // map.on('click', function addMarker(e) {
+        // 	var newMarker = new L.marker(e.latlng).addTo(map);
+        // });
 
+
+        function getWaypointByName(name) {
+        	for (var i = 0; i < waypoints.length; i++) {
+        		if (waypoints[i].name === name) {
+        			return waypoints[i];
+        		}
+        	}
+        	return "No name found";
+        }
     </script>
 </body>
 </html>
