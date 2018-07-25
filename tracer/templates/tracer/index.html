@@ -17,6 +17,7 @@
 <body>
     <div id="map" class="map"></div>
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+    <script src="{% static 'tracer/js/Control.Geocoder.js' %}"></script>
     <script src="{% static 'tracer/js/leaflet-routing-machine.js' %}"></script>
     <script>
         var waypoints = [
@@ -297,7 +298,7 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        L.Routing.control({
+        var control = L.Routing.control({
             waypoints: [                
             	L.latLng(10.340498, 123.906306),
         		L.latLng(10.336344, 123.907881),
@@ -321,8 +322,42 @@
         		L.latLng(10.331205, 123.908111),
                 L.latLng(10.340498, 123.906306),
             ],
-            router: L.Routing.mapbox('pk.eyJ1IjoiamFjZXJvbGRhbiIsImEiOiJjamp6dDM0OTgwZmJ6M3B0eTZyNmhkaWZ6In0.jdkab4YMJJKdrI5rz_bzLg')
+            router: L.Routing.mapbox('pk.eyJ1IjoiamFjZXJvbGRhbiIsImEiOiJjamp6dDM0OTgwZmJ6M3B0eTZyNmhkaWZ6In0.jdkab4YMJJKdrI5rz_bzLg'),
+            geocoder: L.Control.Geocoder.google()	
         }).addTo(map);
+
+        //functions for initiating waypoint creation on click actions
+
+        function createButton(label, container) {
+        	var btn = L.DomUtil.create('button', '', container);
+        	btn.setAttribute('type', 'button');
+        	btn.innerHTML = label;
+        	return btn;
+        }
+
+        map.on('click', function(e) {
+        	console.log(e);
+        	var container = L.DomUtil.create('div'),
+        		startBtn = createButton('Start from this location', container),
+        		destBtn = createButton('Go to this location', container);
+
+        	L.popup()
+        	 .setContent(container)
+        	 .setLatLng(e.latlng)
+        	 .openOn(map);
+
+        	L.DomEvent.on(startBtn, 'click', function() {
+        		control.spliceWaypoints(0, 1, e.latlng);
+        		map.closePopup();
+        	});
+
+        	L.DomEvent.on(destBtn, 'click', function() {
+        		control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+        		map.closePopup();
+        	})
+        });
+
+
     </script>
 </body>
 </html>
