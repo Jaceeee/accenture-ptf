@@ -1,3 +1,30 @@
+// get personal coordinates
+var currentLocation;
+
+if("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+        currentLocation = position;
+    })
+} else {
+    alert("geoloation is not available in your browser");
+}
+
+console.log("Triggered geolocation...")
+
+// function for calling HERE api
+
+function getLocationViaHERE(location) {
+    var unres_coords = new Promise(function(resolve, reject) {
+        $.ajax({
+            url: 'https://geocoder.cit.api.here.com/6.2/geocode.json?app_id=jlSvwwwjsXosoDszZSTF&app_code=pAvc11w29ynkyotNn4vQ6A&searchtext=' + location
+        }).then(function(data) {
+              resolve(data.Response.View[0].Result[0].Location.DisplayPosition);
+        });
+    });
+
+    return unres_coords
+}
+
 var mymap = L.map('mapid').setView([51.505, -0.09], 13);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiamFjZXJvbGRhbiIsImEiOiJjamphMDh2bDIwMG91M3ZwZWVmbDM0OW1wIn0.RbYOzZO99zSWRcsD9GvwlQ', {
@@ -5,7 +32,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-	id: 'mapbox.satellite'
+	id: 'mapbox.streets'
 }).addTo(mymap);
 
 //try using 'mapbox.streets' instead of 'mapbox.satellite' for maps street view
