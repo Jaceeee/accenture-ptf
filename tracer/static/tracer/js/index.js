@@ -61,21 +61,27 @@ map.on('click', function(e) {
   var marker = L.marker(e.latlng).addTo(map);
   marker.bindPopup(`lat: ${e.latlng.lat}, lng: ${e.latlng.lng}`);
 
-  var bestRoute = {name: "", distance: minDistance, latLng: null};
+  var suggestedRoutes = [];
+
   for (var i = 0; i < routes.length; i++) {
     var route = routes[i];
     var closestPoint = route.polyline.closestLayerPoint(e.layerPoint);
     if (!closestPoint) continue; // not sure why sometimes closestPoint is null. As far as the testing, closestPoint only becomes null when the clicked point is far.
     var closestLatLng = map.layerPointToLatLng(closestPoint);
     var distance = closestLatLng.distanceTo(e.latlng);
-    if (distance < bestRoute.distance) {
-      bestRoute = {name: route.name, distance: distance, latLng: closestLatLng};
+    if (distance <= minDistance) {
+      suggestRoute = {name: route.name, distance: distance, latLng: closestLatLng};
+      suggestedRoutes.push(suggestRoute);
     }
   }
 
-  if (bestRoute.name) {
-    marker = L.marker([bestRoute.latLng.lat, bestRoute.latLng.lng]).addTo(map);
-    marker.bindPopup(`name: ${bestRoute.name}, lat: ${bestRoute.latLng.lat}, lng: ${bestRoute.latLng.lng}`);
+  if (suggestedRoutes.length) {
+    for (var i = 0; i < suggestedRoutes.length; i++) {
+      marker = L.marker([suggestedRoutes[i].latLng.lat, suggestedRoutes[i].latLng.lng]).addTo(map);
+      marker.bindPopup(`name: ${suggestedRoutes[i].name}, lat: ${suggestedRoutes[i].latLng.lat}, lng: ${suggestedRoutes[i].latLng.lng}`);
+      console.log(`suggested: ${suggestedRoutes[i].name}`);
+    }
+    console.log("");
   } else {
     console.log("No jeepneys near that location");
   }
