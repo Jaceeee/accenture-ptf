@@ -6,6 +6,7 @@
     <title>17D Example route</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
     <link rel="stylesheet" href="{%static 'tracer/css/leaflet-routing-machine.css' %}" />
+    <link rel="stylesheet" href="{%static 'tracer/css/Control.Geocoder.css' %}">
     <style>
         .map {
             position: absolute;
@@ -18,6 +19,7 @@
     <div id="map" class="map"></div>
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
     <script src="{% static 'tracer/js/leaflet-routing-machine.js' %}"></script>
+    <script src="{%static 'tracer/js/Control.Geocoder.js' %}"></script>
     <script>
         var waypoints = [
             {
@@ -47,7 +49,7 @@
                     L.latLng(10.314763, 123.914483),
                     L.latLng(10.311723, 123.916725),
                     L.latLng(10.309699, 123.918396),
-                ]                
+                ]
             },
             {
                 name: "03Q",
@@ -80,7 +82,7 @@
             },
             {
                 name: "04C",
-                routes: [ 
+                routes: [
 	                L.latLng(10.333883, 123.901668),
 	                L.latLng(10.333376, 123.902423),
 	                L.latLng(10.332410, 123.901752),
@@ -292,13 +294,14 @@
             }
         ];
         var map = L.map('map');
+        var routes = [];
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
         L.Routing.control({
-            waypoints: [                
+            waypoints: [
             	L.latLng(10.340498, 123.906306),
         		L.latLng(10.336344, 123.907881),
         		L.latLng(10.331031, 123.908127),
@@ -321,8 +324,28 @@
         		L.latLng(10.331205, 123.908111),
                 L.latLng(10.340498, 123.906306),
             ],
+            routeWhileDragging: true,
+            geocoder: L.Control.Geocoder.nominatim(),
             router: L.Routing.mapbox('pk.eyJ1IjoiamFjZXJvbGRhbiIsImEiOiJjamp6dDM0OTgwZmJ6M3B0eTZyNmhkaWZ6In0.jdkab4YMJJKdrI5rz_bzLg')
-        }).addTo(map);
+        })
+        .on('routeselected', function(e) {
+          var route = e.route;
+          var polyline = L.polyline(route.coordinates, {color: 'blue'}).addTo(map);
+          routes.push(polyline);
+          map.removeControl(control);
+        })
+        .addTo(map);
+
+        map.on('click', function(e) {
+          var marker = L.marker(e.latlng).addTo(map);
+          marker.bindPopup(`lat: ${e.latlng.lat}, lng: ${e.latlng.lng}`);
+
+          var closestPoint = routes[0].closestLayerPoint(e.layerPoint);
+          var closestLatLng = map.layerPointToLatLng(closestPoint);
+
+          marker = L.marker([closestLatLng.lat, closestLatLng.lng]).addTo(map);
+          marker.bindPopup(`lat: ${closestLatLng.lat}, lng: ${closestLatLng.lng}`);
+        });
     </script>
 </body>
 </html>
