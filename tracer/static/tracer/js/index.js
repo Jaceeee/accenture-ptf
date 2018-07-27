@@ -66,6 +66,7 @@ map.on('click', function(e) {
 
   for (var i = 0; i < routes.length; i++) {
     var route = routes[i];
+    route.polyline.setStyle({opacity: 0.0});
     var closestPoint = route.polyline.closestLayerPoint(e.layerPoint);
     if (!closestPoint) continue; // not sure why sometimes closestPoint is null. As far as the testing, closestPoint only becomes null when the clicked point is far.
     var closestLatLng = map.layerPointToLatLng(closestPoint);
