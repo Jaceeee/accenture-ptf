@@ -26,7 +26,7 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 control = L.Routing.control({
-    // arbitrary waypoints to set up latitud and longitude map screen
+    // arbitrary waypoints to set up latitude and longitude map screen
     waypoints: [
       L.latLng(10.319473, 123.903519),
       L.latLng(10.318842, 123.902977),
@@ -50,29 +50,35 @@ control = L.Routing.control({
 
   for (var i = 0; i < jeepneyRoutes.length; i++) {
     var polyline = L.polyline(jeepneyRoutes[i].coordinates, {color: 'blue'}).addTo(map);
-    routes.push(polyline);
+    routes.push({name: jeepneyRoutes[i].name, polyline: polyline});
   }
+  console.log(routes);
 })
 .addTo(map);
 
 map.on('click', function(e) {
+  var minDistance = 150;
   var marker = L.marker(e.latlng).addTo(map);
   marker.bindPopup(`lat: ${e.latlng.lat}, lng: ${e.latlng.lng}`);
 
-  var bestRoute = {code: "", distance: 9999};
+  var bestRoute = {name: "", distance: minDistance, latLng: null};
   for (var i = 0; i < routes.length; i++) {
     var route = routes[i];
-    // get distance of route from point
-    // if distance less than best route distance, save route as best route
+    var closestPoint = route.polyline.closestLayerPoint(e.layerPoint);
+    if (!closestPoint) continue; // not sure why sometimes closestPoint is null. As far as the testing, closestPoint only becomes null when the clicked point is far.
+    var closestLatLng = map.layerPointToLatLng(closestPoint);
+    var distance = closestLatLng.distanceTo(e.latlng);
+    if (distance < bestRoute.distance) {
+      bestRoute = {name: route.name, distance: distance, latLng: closestLatLng};
+    }
   }
 
-  // display best route
-
-  var closestPoint = routes[0].closestLayerPoint(e.layerPoint);
-  var closestLatLng = map.layerPointToLatLng(closestPoint);
-
-  marker = L.marker([closestLatLng.lat, closestLatLng.lng]).addTo(map);
-  marker.bindPopup(`lat: ${closestLatLng.lat}, lng: ${closestLatLng.lng}`);
+  if (bestRoute.name) {
+    marker = L.marker([bestRoute.latLng.lat, bestRoute.latLng.lng]).addTo(map);
+    marker.bindPopup(`name: ${bestRoute.name}, lat: ${bestRoute.latLng.lat}, lng: ${bestRoute.latLng.lng}`);
+  } else {
+    console.log("No jeepneys near that location");
+  }
 });
 
 // utility function to save route to database
