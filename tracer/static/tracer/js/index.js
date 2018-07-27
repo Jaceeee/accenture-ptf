@@ -77,17 +77,33 @@ map.on('click', function(e) {
   }
 
   if (suggestedRoutes.length) {
+    $('#instructions').append(`<div id="route-selection">
+                                <h5>Select a jeepney route</h5>
+                                <select id="select-route" name="select-route">
+                                </select>
+                                <br><br>
+                                <input id="route-submit" type="submit">
+                              </div>`);
+
     for (var i = 0; i < suggestedRoutes.length; i++) {
       suggestedRoutes[i].polyline.setStyle({opacity: 1.0, color: routeColors[i]});
       marker = L.marker([suggestedRoutes[i].latLng.lat, suggestedRoutes[i].latLng.lng]).addTo(map);
       marker.bindPopup(`name: ${suggestedRoutes[i].name}, lat: ${suggestedRoutes[i].latLng.lat}, lng: ${suggestedRoutes[i].latLng.lng}`);
       console.log(`suggested: ${suggestedRoutes[i].name}`);
+      $('#select-route').append(`<option value="${suggestedRoutes[i].name}">${suggestedRoutes[i].name}</option>`)
     }
+    $('#route-submit').click(selectRoute);
     console.log("");
   } else {
     console.log("No jeepneys near that location");
   }
 });
+
+function selectRoute(e) {
+  var selectedRoute = $('#select-route option:selected').val();
+  $('#route-selection').remove();
+  $('#instructions ol').append(`<li>${selectedRoute}</li>`);
+}
 
 // utility function to save route to database
 function saveRoute(name, route) {
