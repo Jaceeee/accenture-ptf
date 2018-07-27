@@ -20,6 +20,7 @@ function getCookie(c_name) {
 var map = L.map('map');
 var routes = [];
 var saveRouteMode = false;
+var routeColors = ['orange', 'blue', 'green', 'red', 'violet', 'yellow', 'chocolate', 'gray', 'maroon', 'deepskyblue'];
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors'
@@ -49,7 +50,7 @@ control = L.Routing.control({
   }
 
   for (var i = 0; i < jeepneyRoutes.length; i++) {
-    var polyline = L.polyline(jeepneyRoutes[i].coordinates, {color: 'blue'}).addTo(map);
+    var polyline = L.polyline(jeepneyRoutes[i].coordinates, {opacity: 0.0}).addTo(map);
     routes.push({name: jeepneyRoutes[i].name, polyline: polyline});
   }
   console.log(routes);
@@ -70,13 +71,14 @@ map.on('click', function(e) {
     var closestLatLng = map.layerPointToLatLng(closestPoint);
     var distance = closestLatLng.distanceTo(e.latlng);
     if (distance <= minDistance) {
-      suggestRoute = {name: route.name, distance: distance, latLng: closestLatLng};
+      suggestRoute = {name: route.name, polyline: route.polyline, distance: distance, latLng: closestLatLng};
       suggestedRoutes.push(suggestRoute);
     }
   }
 
   if (suggestedRoutes.length) {
     for (var i = 0; i < suggestedRoutes.length; i++) {
+      suggestedRoutes[i].polyline.setStyle({opacity: 1.0, color: routeColors[i]});
       marker = L.marker([suggestedRoutes[i].latLng.lat, suggestedRoutes[i].latLng.lng]).addTo(map);
       marker.bindPopup(`name: ${suggestedRoutes[i].name}, lat: ${suggestedRoutes[i].latLng.lat}, lng: ${suggestedRoutes[i].latLng.lng}`);
       console.log(`suggested: ${suggestedRoutes[i].name}`);
