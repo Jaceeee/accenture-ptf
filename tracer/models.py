@@ -1,3 +1,5 @@
 from django.db import models
 
-# Create your models here.
+class JeepneyRoute(models.Model):
+    name = models.CharField()
+    coordinates = models.TextField(null=True, blank=True)
