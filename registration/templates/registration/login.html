@@ -1,0 +1,25 @@
+{% block content %}
+<div class="container">
+  <form action="{% url 'registration:login' %}" method="post" class="login_form">
+  	{% csrf_token %}
+    <div class="form_container">
+      <table class="login-table">
+        <tr>
+          <td class="label"><label for="username"><b>Username:</b></label></td>
+          <td class="form-field"><input type="text" placeholder="Enter Username" name="username" required></td>
+        </tr>
+        <tr>
+          <td class="label"><label for="password"><b>Password:</b></label></td>
+          <td class="form-field"><input type="password" placeholder="Enter Password" name="password" required></td>
+        </tr>
+      </table>
+
+      <div class="modal-footer">        
+        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Close
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

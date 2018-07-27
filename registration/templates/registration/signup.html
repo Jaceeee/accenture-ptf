@@ -1,0 +1,57 @@
+{% block content %}
+<div class="container">
+  <form action="{% url 'registration:signup' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form_container">
+      <table class="consignup-table">
+					{% for field in user_signup_form %}
+						<tr>
+							<td class="label"><b>{{ field.label_tag }}</b></td>
+							<td class="form-field">{{ field }}</td>
+						</tr>
+						{% if field.help_text %}
+							<small class="form-text text-muted">{{ field.help_text|safe }}</small>
+						{% endif %}
+					{% endfor %}
+					{% for field in pasahero_signup_form %}				
+						<tr>
+							<td class="label"><b>{{ field.label_tag }}</b></td>
+							<td class="form-field">{{ field }}</td>						
+						</tr>
+						{% if field.help_text %}
+							<small class="form-text text-muted">{{ field.help_text|safe }}</small>
+						{% endif %}
+					{% endfor %}
+      </table>
+				{% if pasahero_signup_form.errors %}
+		      {% for field in pasahero_signup_form %}
+		        {% for error in field.errors %}
+		          <div class="alert alert-danger">
+			          <strong>{{ error|escape }}</strong>
+		          </div>
+		        {% endfor %}
+		      {% endfor %}
+			    {% for error in pasahero_signup_form.non_field_errors %}
+		        <div class="alert alert-danger">
+		          <strong>{{ error|escape }}</strong>
+		        </div>
+		      {% endfor %}
+		  	{% endif %}
+		  	{% if user_signup_form.errors %}
+		  		{% for field in user_signup_form %}
+		  			{% for error in field.errors %}
+		  				<div class="alert alert-danger">
+		  					<strong>{{ error|escape }}</strong>
+		  				</div>
+		  			{% endfor %}
+		  		{% endfor %}
+		  	{% endif %}
+    </div>
+    <div class="modal-footer">        
+        <button type="submit" class="btn btn-primary">Signup</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Close
+        </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
